@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 import expressWs from 'express-ws';
 import WebTorrent from "webtorrent";
 
-const port = 3001;
+const port = 3000;
 const app = express();
 const expressWss = expressWs(app);
 

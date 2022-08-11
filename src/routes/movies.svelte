@@ -53,7 +53,7 @@
     on:seeking|preventDefault={() => sendMessage('pause')}
     on:seeked|preventDefault={() => sendMessage('seekedTo', String(currentTime))}
 		on:canplay={() => sendMessage('clientCanPlay')}
-		class="flex-grow border-base-300 border"
+		class="flex-grow flex-shrink border-base-300 border"
 	/>
 	<div class="w-fit flex flex-col gap-3">
 		<p class="font-bold text-center text-2xl">{state}</p>
