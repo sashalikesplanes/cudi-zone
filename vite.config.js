@@ -1,5 +1,4 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import injectSocketIO from './server/socketIoHandler';
 
 /** @type {import('vite').UserConfig} */
 const config = {
@@ -9,15 +8,7 @@ const config = {
     preview: {
       port: 5173
     },
-	plugins: [sveltekit(), webSocketServer],
+	plugins: [sveltekit()],
 };
 
 export default config;
-
-
-export const webSocketServer = {
-    name: 'webSocketServer',
-    configureServer(server) {
-        injectSocketIO(server.httpServer);
-    }
-};

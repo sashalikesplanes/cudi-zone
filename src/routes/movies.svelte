@@ -13,7 +13,7 @@
 	}
 
 	onMount(() => {
-		ws = new WebSocket('ws://' + location.host + '/state');
+		ws = new WebSocket('ws://' + location.host + '/sync');
 		ws.onerror = (event) => {
 			state = 'error';
 			console.error(event);
@@ -40,6 +40,11 @@
 			  currentTime = Number(data);
 			}
 		};
+
+		ws.onclose = () => console.log('WEB SOCKET Closed');
+		ws.onerror = (e) => console.log('Error with WEB SOCKET ', e);
+
+		return () => ws.close();
 	});
 </script>
 
