@@ -2,7 +2,7 @@
 	"name": "cudi-zone",
 	"version": "0.0.1",
 	"scripts": {
-		"dev": "vite dev",
+		"dev": "vite dev & nodemon server",
 		"dev:ws": "nodemon server",
 		"build": "vite build",
 		"package": "svelte-kit package",
@@ -43,6 +43,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@sveltejs/adapter-auto": "^1.0.0-next.64",
 		"@types/express": "^4.17.13",
 		"express": "^4.18.1",
 		"nodemon": "^2.0.19",

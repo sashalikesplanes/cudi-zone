@@ -5,15 +5,19 @@
 	let ws: WebSocket;
 
 	let state = 'paused';
-	let magnetURI: string;
+	let magnetURI = "magnet:?xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fsintel.torrent";
 	let currentTime: number;
+
+	// allow 2 servers in dev for HMR, but 1 server for prod
+	const expressHost = import.meta.env.DEV ? 'localhost:3001' : location.host;
 
 	function sendMessage(msg: string, data?: string) {
 		ws.send(JSON.stringify({ msg, data }));
 	}
 
+
 	onMount(() => {
-		ws = new WebSocket('ws://' + location.host + '/sync');
+		ws = new WebSocket(`ws://${expressHost}/sync`);
 		ws.onerror = (event) => {
 			state = 'error';
 			console.error(event);
@@ -28,7 +32,7 @@
 			if (msg === 'serverRecievedTorrent') state = 'server loading';
 			else if (msg === 'serverTorrentReady') {
 				state = 'client loading';
-				player.src = `/video/${data}`;
+				player.src = `http://${expressHost}/video/${data}`;
 			} else if (msg === 'playbackReady') state = 'paused';
 			else if (msg === 'play') {
 				state = 'playing';
@@ -62,7 +66,7 @@
 	/>
 	<div class="w-fit flex flex-col gap-3">
 		<p class="font-bold text-center text-2xl">{state}</p>
-		<p class="font-bold text-center text-2xl">{currentTime}</p>
+		<p class="font-bold text-center text-2xl">{Number(currentTime || 0).toFixed(3)}</p>
 		<input
 			bind:value={magnetURI}
 			type="text"
