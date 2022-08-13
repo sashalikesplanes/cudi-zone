@@ -3,6 +3,7 @@ import { eventEmmiter } from './events.js';
 
 
 export default (server) => {
+  // TODO client management
   const wss = new WebSocket.Server({
     noServer: true,
     path: '/sync',
@@ -23,22 +24,20 @@ export default (server) => {
   });
 
   wss.on('connection', (ws, req) => {
-    ws.onmessage = async (event) => {
+    ws.onmessage = (event) => {
       const { msg, data } = JSON.parse(event.data);
-      if (msg === 'pause') {
-        // TODO add logic to not allow play immidiatly after pause
-        sendMessage('pause');
-        // setTimeout(() => playForbidden = false, 500);
-      } else if (msg === 'play') {
-        sendMessage('play');
-      } else if (msg === 'clientSubmitTorrent') {
+      messageHandler[msg](data);
+    }
+
+    const messageHandler = {
+      pause: () => sendMessage('pause'),
+      play: () => sendMessage('play'),
+      clientSubmitTorrent: (data) => {
         sendMessage('serverRecievedTorrent');
         eventEmmiter.emit('addTorrent', data)
-      } else if (msg === 'clientCanPlay') {
-        sendMessage('pause');
-      } else if (msg === 'seekedTo') {
-        sendMessage('seekedTo', data);
-      }
+      },
+      clientCanPlay: () => sendMessage('pause'),
+      seekedTo: (data) => sendMessage('seekedTo', data),
     }
 
     eventEmmiter.on('torrentReady', (hash) => {
