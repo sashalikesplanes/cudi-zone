@@ -58,7 +58,7 @@
     remoteVideo.srcObject = remoteStream;
 
 		// TODO abstract and refactor
-		ws = new WebSocket(`ws://${expressHost}/sync?id=${$clientState.userId}`);
+		ws = new WebSocket(`wss://${expressHost}/sync?id=${$clientState.userId}`);
 		ws.onerror = (event) => {
 			state = 'error';
 			console.error(event);
@@ -109,7 +109,7 @@
       } else if (msg === 'serverRecievedTorrent') state = 'server loading';
 			else if (msg === 'serverTorrentReady') {
 				state = 'client loading';
-				player.src = `http://${expressHost}/video/${data}`;
+				player.src = `https://${expressHost}/video/${data}`;
 			} else if (msg === 'playbackReady') state = 'paused';
 			else if (msg === 'play') {
 				state = 'playing';

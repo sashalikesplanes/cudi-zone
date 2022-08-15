@@ -72,7 +72,7 @@ function createRooms(wss) {
       broadcastToRoom(room, 'error', 'Adding torrent before both are connected')
     }
 
-    const res = await fetch(`http://${host}/video`, {
+    const res = await fetch(`https://${host}/video`, {
       method: 'post',
       body: JSON.stringify({ magnetUri }),
       headers: {'Content-Type': 'application/json'}
