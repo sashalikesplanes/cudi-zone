@@ -4,16 +4,15 @@ import { eventEmmiter } from './events.js';
 
 let client = new WebTorrent({ uploadLimit: 100000 }); // Limit to a max of 240 GiB per month
 
-eventEmmiter.on('addTorrent', async (magnet) => {
-  const torrent = await addOrFindTorrentByMagnet(client, magnet);
-  if (torrent.ready) {
-    eventEmmiter.emit('torrentReady', torrent.infoHash);
-  } else {
-    torrent.on('ready', () => eventEmmiter.emit('torrentReady', torrent.infoHash));
-  }
-})
+export async function addTorrentHandler(req, res) {
+  const magnetUri = req.body.magnetUri;
+  const torrent = await addOrFindTorrentByMagnet(client, magnetUri);
+  if (torrent.ready) eventEmmiter.emit('torrentReady', torrent.infoHash);
+  torrent.on('ready', () => eventEmmiter.emit('torrentReady', torrent.infoHash));
+  res.json({ hash: torrent.infoHash });
+}
 
-export default async function videoHandler(req, res) {
+export async function streamTorrentHandler(req, res) {
   const torrent = findTorrentByHash(client, req.params.hash);
 
   if (!torrent) {
@@ -55,8 +54,8 @@ export default async function videoHandler(req, res) {
   }
 }
 
-function getTorrentHashFromMagnetURI(magnetURI) {
-  return magnetURI.match(/btih:([a-f0-9]+)/i)[1].toLowerCase()
+function getTorrentHashFromMagnetUri(magnetUri) {
+  return magnetUri.match(/btih:([a-f0-9]+)/i)[1].toLowerCase()
 }
 
 function findTorrentByHash(client, infoHash) {
@@ -65,9 +64,9 @@ function findTorrentByHash(client, infoHash) {
   })
 }
 
-async function addOrFindTorrentByMagnet(client, magnetURI) {
-  const torrentHash = getTorrentHashFromMagnetURI(magnetURI);
-  // search the client for matching torrentURI
+async function addOrFindTorrentByMagnet(client, magnetUri) {
+  const torrentHash = getTorrentHashFromMagnetUri(magnetUri);
+  // search the client for matching torrentUri
   return new Promise(async (resolve, reject) => {
     const torrent = findTorrentByHash(client, torrentHash);
     if (torrent) {
@@ -76,7 +75,7 @@ async function addOrFindTorrentByMagnet(client, magnetURI) {
     }
 
     try {
-      client.add(magnetURI, { destroyStoreOnDestroy: true }, (torrent) => {
+      client.add(magnetUri, { destroyStoreOnDestroy: true }, (torrent) => {
         resolve(torrent);
       });
       return;
