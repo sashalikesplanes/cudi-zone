@@ -30,7 +30,8 @@
 	let remoteVideo;
 
 	// allow 2 servers in dev for HMR, but 1 server for prod
-	const expressHost = import.meta.env.DEV ? 'localhost:3001' : location.host;
+	// const expressHost = import.meta.env.DEV ? 'localhost:3001' : location.host;
+	const expressHost = 'localhost:3001';
 
 	function sendMessage(msg: string, data?: any) {
 		ws.send(JSON.stringify({ msg, data }));

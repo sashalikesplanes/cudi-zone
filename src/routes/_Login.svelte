@@ -16,6 +16,8 @@
 		} else if (view === 'signin') {
 			const { error: signInError } = await supabaseClient.auth.signIn({ email, password });
 			error = signInError?.message || '';
+		} else {
+		  console.error('neither method attempted')
 		}
 		loading = false;
 	}
