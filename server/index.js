@@ -3,7 +3,7 @@ import { handler } from '../build/handler.js';
 import websocket from './sync.js';
 import { streamTorrentHandler, addTorrentHandler } from './torrents.js';
 
-const port = 3001;
+const port = 3000;
 const app = express();
 
 app.use(express.json())
