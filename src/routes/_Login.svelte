@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { supabaseClient } from '$lib/db';
 	import { page } from '$app/stores';
-	import { session } from '$app/stores';
+import { clientState } from '$lib/stores';
+
 	let username = '',
 		password = '',
 		loading = false;
@@ -14,11 +15,17 @@
 		if (view === 'signup') {
 			const { user, error: signUpError } = await supabaseClient.auth.signUp({ email, password });
 			error = signUpError?.message || '';
-			// $session.user = { id: user.id }
+			if (user) {
+			  $clientState.userId = user.id;
+			  $clientState.userUsername = user.email.split('@')[0];
+			}
 		} else if (view === 'signin') {
 			const { user, error: signInError } = await supabaseClient.auth.signIn({ email, password });
 			error = signInError?.message || '';
-			// $session.user = { id: user.id }
+			if (user) {
+			  $clientState.userId = user.id;
+			  $clientState.userUsername = user.email.split('@')[0];
+			}
 		} else {
 		  console.error('')
 		}

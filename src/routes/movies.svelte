@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { session } from '$app/stores';
 	import { clientState } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/env';
@@ -41,7 +40,7 @@
 	}
 
 	onMount(async () => {
-		if (!$session.user) goto('/profile');
+		if (!$clientState.userId) goto('/profile');
 		pc = new RTCPeerConnection(stunServers);
 
 		localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -59,7 +58,7 @@
     remoteVideo.srcObject = remoteStream;
 
 		// TODO abstract and refactor
-		ws = new WebSocket(`ws://${expressHost}/sync?id=${$session.user.id}`);
+		ws = new WebSocket(`ws://${expressHost}/sync?id=${$clientState.userId}`);
 		ws.onerror = (event) => {
 			state = 'error';
 			console.error(event);

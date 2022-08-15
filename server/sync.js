@@ -66,13 +66,13 @@ function createRooms(wss) {
     if (room.client1.ready && room.client2.ready) broadcastToRoom(room, 'pause');
   }
 
-  async function addTorrent(id, magnetUri) {
+  async function addTorrent(id, magnetUri, host) {
     const room = findRoom(id);
     if (!room.client1.connected || !room.client2.connected) {
       broadcastToRoom(room, 'error', 'Adding torrent before both are connected')
     }
 
-    const res = await fetch('http://localhost:3001/video', {
+    const res = await fetch(`http://${host}/video`, {
       method: 'post',
       body: JSON.stringify({ magnetUri }),
       headers: {'Content-Type': 'application/json'}
@@ -219,7 +219,7 @@ export default (server) => {
         rooms.clientConnected(clientId);
       } else if (msg === 'pause') rooms.pauseRoom(clientId);
       else if (msg === 'play') rooms.playRoom(clientId);
-      else if (msg === 'clientSubmitTorrent') rooms.addTorrent(clientId, data);
+      else if (msg === 'clientSubmitTorrent') rooms.addTorrent(clientId, data, req.headers.host);
       else if (msg === 'clientReady') rooms.clientReady(clientId);
       else if (msg === 'seekedTo') rooms.seekTo(clientId, data);
       else if (msg === 'newOfferCandidate') rooms.addNewOfferCandidate(clientId, data);

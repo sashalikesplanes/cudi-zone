@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { supabaseClient } from '$lib/db';
-	import { session } from '$app/stores';
 	import { clientState } from '$lib/stores';
 	import { goto } from '$app/navigation';
 
@@ -24,7 +23,7 @@
 		const { data } = await supabaseClient
 			.from('active_friendships')
 			.select('*')
-			.eq('user_id', $session.user.id);
+			.eq('user_id', $clientState.userId);
 
 		if (!data) return [];
 
@@ -38,7 +37,7 @@
 		const { data } = await supabaseClient
 			.from('pending_friendships')
 			.select('*')
-			.eq('friend_id', $session.user.id);
+			.eq('friend_id', $clientState.userId);
 
 		if (!data) return [];
 
@@ -52,7 +51,7 @@
 		loadingAccepts = [...loadingAccepts, friendId];
 		await supabaseClient.from('friendships').insert([
 			{
-				user_id: $session.user.id,
+				user_id: $clientState.userId,
 				friend_id: friendId
 			}
 		]);
@@ -87,7 +86,7 @@
 		const newFriendId = userData[0].id;
 		const { error } = await supabaseClient.from('friendships').insert([
 			{
-				user_id: $session.user.id,
+				user_id: $clientState.userId,
 				friend_id: newFriendId
 			}
 		]);
