@@ -49,7 +49,9 @@ function createRooms(wss) {
 
     if (room.client1.connected && room.client2.connected) {
       if (!room.offer) broadcastToRoom(room, 'error', 'Second client connected but no offer');
-      else broadcastToClient(id, 'secondClientConnected', JSON.stringify(room.offer))
+      else {
+        broadcastToClient(id, 'secondClientConnected', JSON.stringify(room.offer))
+      }
     } 
     else broadcastToClient(id, 'firstClientConnected')
   }
