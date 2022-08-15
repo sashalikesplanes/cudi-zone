@@ -14,11 +14,11 @@
 		if (view === 'signup') {
 			const { user, error: signUpError } = await supabaseClient.auth.signUp({ email, password });
 			error = signUpError?.message || '';
-			$session.user = { id: user.id }
+			// $session.user = { id: user.id }
 		} else if (view === 'signin') {
 			const { user, error: signInError } = await supabaseClient.auth.signIn({ email, password });
 			error = signInError?.message || '';
-			$session.user = { id: user.id }
+			// $session.user = { id: user.id }
 		} else {
 		  console.error('')
 		}

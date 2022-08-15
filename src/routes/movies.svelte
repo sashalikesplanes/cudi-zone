@@ -31,7 +31,10 @@
 
 	// allow 2 servers in dev for HMR, but 1 server for prod
 	// const expressHost = import.meta.env.DEV ? 'localhost:3001' : location.host;
-	const expressHost = 'localhost:3001';
+	// const expressHost = 'localhost:3001';
+ // const expressHost = '04e6-2001-7e8-c68a-4401-b94d-9054-b58c-416e.eu.ngrok.io'
+  const expressHost = location.host;
+
 
 	function sendMessage(msg: string, data?: any) {
 		ws.send(JSON.stringify({ msg, data }));
