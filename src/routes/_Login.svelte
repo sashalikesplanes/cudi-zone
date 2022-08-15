@@ -33,7 +33,10 @@
 			<dd class="w-2/3">
 				<input
 					type="text"
-					class="w-full"
+          required
+          title="Please only include up to 22 alphanumeric characters"
+					class="input input-bordered bg-base-200 w-full"
+					pattern={`[0-9A-Za-z]{1,22}`}
 					bind:value={username}
 					name="username"
 					id="username"
@@ -48,7 +51,8 @@
 			</dt>
 			<dd class="w-2/3">
 				<input
-					class="w-full"
+				  required
+					class="input input-bordered bg-base-200 w-full"
 					type="password"
 					bind:value={password}
 					name="password"
