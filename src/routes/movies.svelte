@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { session } from '$app/stores';
+	import { clientState } from '$lib/stores';
+import { goto } from '$app/navigation';
 
 	let player: HTMLVideoElement;
 	let ws: WebSocket;
@@ -11,10 +14,11 @@
 	// allow 2 servers in dev for HMR, but 1 server for prod
 	const expressHost = import.meta.env.DEV ? 'localhost:3001' : location.host;
 
-	function sendMessage(msg: string, data?: string) {
+	$: if (!$session.user) goto('/profile');
+
+	function sendMessage(msg: string, data?: any) {
 		ws.send(JSON.stringify({ msg, data }));
 	}
-
 
 	onMount(() => {
 		ws = new WebSocket(`ws://${expressHost}/sync`);
@@ -25,10 +29,12 @@
 
 		ws.onopen = () => {
 			state = 'connected';
+			sendMessage('clientConnection', [$session.user.id, $clientState.partnerId]);
 		};
 
 		ws.onmessage = (event) => {
 			const { msg, data } = JSON.parse(event.data);
+			console.log(msg);
 			if (msg === 'serverRecievedTorrent') state = 'server loading';
 			else if (msg === 'serverTorrentReady') {
 				state = 'client loading';

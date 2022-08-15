@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { supabaseClient } from '$lib/db';
 	import { session } from '$app/stores';
+	import { clientState } from '$lib/stores';
+	import { goto } from '$app/navigation';
 
 	let activeFriendsPromise = getActiveFriends();
 	let friendRequestsPromise = getFriendRequests();
@@ -14,9 +16,9 @@
 	let loadingAccepts: string[] = [];
 
 	type User = {
-    id: string;
-    email: string;
-	}
+		id: string;
+		email: string;
+	};
 
 	async function getActiveFriends() {
 		const { data } = await supabaseClient
@@ -81,21 +83,26 @@
 			errors = 'User does not exist';
 			loadingNewFriend = false;
 			return;
-		} 
+		}
 		const newFriendId = userData[0].id;
-		const { error } = await supabaseClient
-		  .from('friendships')
-		  .insert([{
-        user_id: $session.user.id,
-        friend_id: newFriendId
-		  }]);
+		const { error } = await supabaseClient.from('friendships').insert([
+			{
+				user_id: $session.user.id,
+				friend_id: newFriendId
+			}
+		]);
 
 		if (error) {
-		  errors = error.message;
+			errors = error.message;
 		} else {
-      newFriend = '';
+			newFriend = '';
 		}
 		loadingNewFriend = false;
+	}
+	async function joinRoom(friendId: string, friendUsername: string) {
+		$clientState.partnerId = friendId;
+		$clientState.partnerUsername = friendUsername;
+		goto('movies');
 	}
 </script>
 
@@ -108,7 +115,10 @@
 				<article class="alert shadow-lg mb-3">
 					<span class="text-xl font-bold">{friend.username}</span>
 					<div class="flex-none">
-						<button class="btn btn-sm btn-primary">Join Room</button>
+						<button
+							on:click={() => joinRoom(friend.id, friend.username)}
+							class="btn btn-sm btn-primary">Join Room</button
+						>
 					</div>
 				</article>
 			{:else}
