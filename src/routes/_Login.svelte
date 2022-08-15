@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { supabaseClient } from '$lib/db';
 	import { page } from '$app/stores';
+	import { session } from '$app/stores';
 	let username = '',
 		password = '',
 		loading = false;
@@ -11,13 +12,15 @@
 		loading = true;
 		const email = username + '@fake.email';
 		if (view === 'signup') {
-			const { error: signUpError } = await supabaseClient.auth.signUp({ email, password });
+			const { user, error: signUpError } = await supabaseClient.auth.signUp({ email, password });
 			error = signUpError?.message || '';
+			$session.user = { id: user.id }
 		} else if (view === 'signin') {
-			const { error: signInError } = await supabaseClient.auth.signIn({ email, password });
+			const { user, error: signInError } = await supabaseClient.auth.signIn({ email, password });
 			error = signInError?.message || '';
+			$session.user = { id: user.id }
 		} else {
-		  console.error('neither method attempted')
+		  console.error('')
 		}
 		loading = false;
 	}
@@ -35,8 +38,8 @@
 			<dd class="w-2/3">
 				<input
 					type="text"
-          required
-          title="Please only include up to 22 alphanumeric characters"
+					required
+					title="Please only include up to 22 alphanumeric characters"
 					class="input input-bordered bg-base-200 w-full"
 					pattern={`[0-9A-Za-z]{1,22}`}
 					bind:value={username}
@@ -53,7 +56,7 @@
 			</dt>
 			<dd class="w-2/3">
 				<input
-				  required
+					required
 					class="input input-bordered bg-base-200 w-full"
 					type="password"
 					bind:value={password}
