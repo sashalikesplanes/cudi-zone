@@ -24,6 +24,8 @@ function createRooms(wss) {
       pausedRecently: false,
       torrentSubmitted: false,
       torrentReady: false,
+      offerCandidates: [],
+      offer: undefined,
     })
   }
 
@@ -45,8 +47,13 @@ function createRooms(wss) {
     if (room.client1.id === id) room.client1.connected = true;
     else if (room.client2.id === id) room.client2.connected = true;
 
-    if (room.client1.connected && room.client2.connected) broadcastToRoom(room, 'clientsConnected');
+    if (room.client1.connected && room.client2.connected) {
+      if (!room.offer) broadcastToRoom(room, 'error', 'Second client connected but no offer');
+      else broadcastToClient(id, 'secondClientConnected', JSON.stringify(room.offer))
+    } 
+    else broadcastToClient(id, 'firstClientConnected')
   }
+
 
   function clientReady(id) {
     const room = findRoom(id);
@@ -117,10 +124,38 @@ function createRooms(wss) {
     })
   }
 
+  function broadcastToClient(clientId, msg, data) {
+    wss.clients.forEach((client) => {
+      if (client.id === clientId) client.send(JSON.stringify({ msg, data }));
+    })
+  }
+
+  function broadcastToOtherClient(clientId, msg, data) {
+    const room = findRoom(clientId);
+    const otherClientId = room.client1.id === clientId ? room.client2.id : room.client1.id;
+    broadcastToClient(otherClientId, 'newCandidate', data);
+  }
+
   function isPartnerBusy(clientId, partnerId) {
     const room = findRoom(partnerId)
     if (!room) return false;
     return ((room.client1.id === partnerId && room.client2.id !== clientId) || (room.client1.id !== clientId && room.client2.id === partnerId));
+  }
+
+  function addNewOfferCandidate(clientId, offerCandidate) {
+    const room = findRoom(clientId);
+    room.offerCandidates.push(offerCandidate);
+  }
+
+  function addNewOffer(clientId, offerJSON) {
+    const offer = JSON.parse(offerJSON);
+    const room = findRoom(clientId);
+    room.offer = offer;
+  }
+
+  function sendAnswer(clientId, anwserJSON) {
+    const room = findRoom(clientId);
+    broadcastToRoom(room, 'newAnswer', anwserJSON);
   }
 
   return {
@@ -135,6 +170,11 @@ function createRooms(wss) {
     pauseRoom, // id x
     playRoom, // id x
     seekTo, // id, time x
+    addNewOfferCandidate,
+    addNewOffer,
+    broadcastToRoom,
+    sendAnswer,
+    broadcastToOtherClient,
   }
 }
 
@@ -180,6 +220,10 @@ export default (server) => {
       else if (msg === 'clientSubmitTorrent') rooms.addTorrent(clientId, data);
       else if (msg === 'clientReady') rooms.clientReady(clientId);
       else if (msg === 'seekedTo') rooms.seekTo(clientId, data);
+      else if (msg === 'newOfferCandidate') rooms.addNewOfferCandidate(clientId, data);
+      else if (msg === 'newOffer') rooms.addNewOffer(clientId, data);
+      else if (msg === 'newAnswer') rooms.sendAnswer(clientId, data);
+      else if (msg === 'newCandidate') rooms.broadcastToOtherClient(clientId, 'newCandidate', data);
 
         // now as soon as the client opens the connection
         // there is a gurantee that a room exists hence we can 
