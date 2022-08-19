@@ -32,7 +32,7 @@
   </div>
   <div class="flex-none">
     <ul class="menu menu-horizontal p-0">
-      <li><a href="/movies">Movies</a></li>
+      <li><a href="/chatroom">ChatRoom</a></li>
       <li><a href="/">{($user && $user.name) || 'Profile'}</a></li>
     </ul>
   </div>
