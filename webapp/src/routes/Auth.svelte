@@ -61,11 +61,11 @@
 </form>
 <div class="flex justify-center">
 	{#if view === 'signin'}
-		<a class="link text-center w-max mb-3" href="/profile?view=signup"
+		<a class="link text-center w-max mb-3" href="/?view=signup"
 			>Don't have an account? Sign up!</a
 		>
 	{:else}
-		<a class="link text-center w-max" href="/profile?view=signin"
+		<a class="link text-center w-max" href="/?view=signin"
 			>Already have an account? Sign in!</a
 		>
 	{/if}
