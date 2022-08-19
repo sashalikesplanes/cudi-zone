@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { supabaseClient } from '$lib/db';
-	import { clientState } from '$lib/stores';
+	import { user } from '$lib/stores';
 	import { goto } from '$app/navigation';
 
 	let activeFriendsPromise = getActiveFriends();
@@ -23,7 +23,7 @@
 		const { data } = await supabaseClient
 			.from('active_friendships')
 			.select('*')
-			.eq('user_id', $clientState.userId);
+			.eq('user_id', $user.id);
 
 		if (!data) return [];
 
@@ -37,7 +37,7 @@
 		const { data } = await supabaseClient
 			.from('pending_friendships')
 			.select('*')
-			.eq('friend_id', $clientState.userId);
+			.eq('friend_id', $user.id);
 
 		if (!data) return [];
 
@@ -51,7 +51,7 @@
 		loadingAccepts = [...loadingAccepts, friendId];
 		await supabaseClient.from('friendships').insert([
 			{
-				user_id: $clientState.userId,
+				user_id: $user.id,
 				friend_id: friendId
 			}
 		]);
@@ -86,7 +86,7 @@
 		const newFriendId = userData[0].id;
 		const { error } = await supabaseClient.from('friendships').insert([
 			{
-				user_id: $clientState.userId,
+				user_id: $user.id,
 				friend_id: newFriendId
 			}
 		]);
@@ -99,8 +99,8 @@
 		loadingNewFriend = false;
 	}
 	async function joinRoom(friendId: string, friendUsername: string) {
-		$clientState.partnerId = friendId;
-		$clientState.partnerUsername = friendUsername;
+		$user.partnerId = friendId;
+		$user.partnerUsername = friendUsername;
 		goto('movies');
 	}
 </script>

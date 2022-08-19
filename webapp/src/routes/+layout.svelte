@@ -1,8 +1,9 @@
 <script lang="ts">
-	import '../app.css';
+	import '../app.postcss';
 	import { browser } from '$app/env';
-	import { clientState } from '$lib/stores';
+	import { user } from '$lib/stores';
 
+	// populate the user object with all necessary data
 	let currentTheme = 'valentine';
 	function changeTheme() {
 		if (!browser) return;
@@ -23,8 +24,8 @@
     <button on:click={changeTheme} class="btn btn-ghost"
       >{currentTheme === 'dark' ? 'Pink' : 'Dark'}</button
     >
-    {#if $clientState.partnerId}
-      <p>Partner: {$clientState.partnerUsername}</p>
+    {#if $user && $user.partnerId}
+      <p>Partner: {$user.partnerUsername}</p>
     {:else}
       <p>No active partner</p>
     {/if}
@@ -32,7 +33,7 @@
   <div class="flex-none">
     <ul class="menu menu-horizontal p-0">
       <li><a href="/movies">Movies</a></li>
-      <li><a href="/profile">{$clientState.userUsername || 'Profile'}</a></li>
+      <li><a href="/">{($user && $user.name) || 'Profile'}</a></li>
     </ul>
   </div>
 </div>
