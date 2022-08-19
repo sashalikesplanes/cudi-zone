@@ -1,0 +1,21 @@
+{
+  "name": "cudi-zone",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/sashalikesplanes/cudi-zone.git",
+  "author": "Alexander Kiselev <a.kiselev@student.tudelft.nl>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "lerna run --parallel start",
+    "dev": "lerna run --parallel dev",
+    "build": "lerna run --parallel build"
+  },
+  "devDependencies": {
+    "lerna": "^5.4.3",
+    "typescript": "^4.7.4"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}
