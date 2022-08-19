@@ -3,25 +3,18 @@
 	import { user } from '$lib/stores';
 	import { goto } from '$app/navigation';
 
-	type MessageType = 'video-offer' | 'video-answer' | 'new-ice' | 'partner-check';
-
+	// TODO move WS and WebRTC into a separate component that dispatches key events back here
+	type MessageType = 'video-offer' | 'video-answer' | 'new-ice' | 'partner-check' | 'connection';
 	interface Message {
 		from: string;
 		messageType: MessageType;
 		payload: any | undefined;
 	}
-
 	interface SentMessage extends Message {
 		to: string[];
 	}
 
-	function sendMessage(ws: WebSocket, msg: SentMessage) {
-		ws.send(JSON.stringify(msg));
-	}
-
 	let player: HTMLVideoElement;
-	let ws: WebSocket;
-
 	let state = 'paused';
 	let errors = '';
 	let magnetURI =
@@ -29,11 +22,7 @@
 	let currentTime: number;
 
 	const stunServers = {
-		iceServers: [
-			{
-				urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302']
-			}
-		],
+		iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }],
 		iceCandidatePoolSize: 10 // why?
 	};
 
@@ -42,23 +31,27 @@
 	let remoteStream = new MediaStream();
 	let localVideo: HTMLVideoElement;
 	let remoteVideo: HTMLVideoElement;
+	let ws: WebSocket;
+	const wsUrl = import.meta.env.VITE_SERVER_URL;
 
-	const expressHost = location.host;
+	function sendMessage(ws: WebSocket, msg: SentMessage) {
+		ws.send(JSON.stringify(msg));
+	}
 
-  function handleNewIce(event: RTCPeerConnectionIceEvent, ws: WebSocket) {
-    if (!$user) {
-      errors += 'no user when found new ice candidate; '
-      return
-    };
+	function handleNewIce(event: RTCPeerConnectionIceEvent, ws: WebSocket) {
+		if (!$user) {
+			errors += 'no user when found new ice candidate; ';
+			return;
+		}
 
-    if (!event.candidate) return;
-    sendMessage(ws, {
-      to: [$user.partnerId],
-      from: $user.id,
-      messageType: 'new-ice',
-      payload: event.candidate
-    });
-  }
+		if (!event.candidate) return;
+		sendMessage(ws, {
+			to: [$user.partnerId],
+			from: $user.id,
+			messageType: 'new-ice',
+			payload: event.candidate
+		});
+	}
 
 	onMount(async () => {
 		if (!$user) goto('/profile');
@@ -74,13 +67,12 @@
 		// Add remote stream (empty now) to remote video
 		remoteVideo.srcObject = remoteStream;
 
-		ws = new WebSocket(`ws://${expressHost}`);
-
+		ws = new WebSocket(`${import.meta.env.DEV ? 'ws' : 'wss'}://${wsUrl}/message`);
 		ws.onopen = () => {
 			if (!$user) {
-			  errors += 'no user when WS opened; '
-			  return
-			};
+				errors += 'no user when WS opened; ';
+				return;
+			}
 
 			sendMessage(ws, {
 				to: [$user.partnerId],
@@ -92,9 +84,9 @@
 
 		ws.onmessage = async (event) => {
 			if (!$user) {
-			  errors += 'no user when recieving message; '
-			  return
-			};
+				errors += 'no user when recieving message; ';
+				return;
+			}
 
 			const { from, messageType, payload } = JSON.parse(event.data) as Message;
 			switch (messageType) {
@@ -110,7 +102,6 @@
 						messageType: 'video-offer',
 						payload: pc.localDescription
 					});
-
 
 					pc.onicecandidate = (event) => handleNewIce(event, ws);
 					break;
@@ -133,8 +124,8 @@
 					break;
 
 				case 'video-answer':
-				  const answerDesc = new RTCSessionDescription(payload);
-				  await pc.setRemoteDescription(answerDesc);
+					const answerDesc = new RTCSessionDescription(payload);
+					await pc.setRemoteDescription(answerDesc);
 					break;
 
 				case 'new-ice':
@@ -143,9 +134,14 @@
 					pc.addIceCandidate(candidate); // could fail
 					break;
 
+				case 'connection':
+					console.log('ws connected');
+					break;
+
 				default:
-					errors += 'unrecognized message type; '
-				  break;
+				  console.log('unrecognized message type: ', messageType);
+					errors += 'unrecognized message type; ';
+					break;
 			}
 			// If partner online, create offer and make ice candidate listener
 			// If partner offline, standby
@@ -168,13 +164,8 @@
 </script>
 
 <main class="flex gap-1">
-	<video
-		bind:this={player}
-		bind:currentTime
-		controls
-		class="flex-grow"
-	/>
-  <!-- on:pause|preventDefault={() => sendMessage('pause')}
+	<video bind:this={player} bind:currentTime controls class="flex-grow" />
+	<!-- on:pause|preventDefault={() => sendMessage('pause')}
   on:play|preventDefault={() => sendMessage('play')}
   on:seeking|preventDefault={() => sendMessage('pause')}
   on:seeked|preventDefault={() => sendMessage('seekedTo', String(currentTime))}
@@ -196,14 +187,11 @@
 		name="magnet"
 		id="magnet"
 	/>
-  <!-- on:click={() => sendMessage('clientSubmitTorrent', magnetURI)} -->
-	<button
-		class="btn "
-		disabled={state !== 'call established'}>Submit torrent</button
-	>
+	<!-- on:click={() => sendMessage('clientSubmitTorrent', magnetURI)} -->
+	<button class="btn " disabled={state !== 'call established'}>Submit torrent</button>
 	{#if state === 'playing'}
-		<button class="btn " >Pause</button>
+		<button class="btn ">Pause</button>
 	{:else if state === 'paused'}
-		<button class="btn " >Play</button>
+		<button class="btn ">Play</button>
 	{/if}
 </div>
