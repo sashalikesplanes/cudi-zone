@@ -3,6 +3,11 @@
 	import { user } from '$lib/stores';
 	import { goto } from '$app/navigation';
 
+	type User = {
+	  id: string;
+	  email: string;
+	}
+
 	let activeFriendsPromise = getActiveFriends();
 	let friendRequestsPromise = getFriendRequests();
 
@@ -14,12 +19,9 @@
 	let loadingDenies: string[] = [];
 	let loadingAccepts: string[] = [];
 
-	type User = {
-		id: string;
-		email: string;
-	};
-
 	async function getActiveFriends() {
+	  if (!$user) throw new Error('no user');
+
 		const { data } = await supabaseClient
 			.from('active_friendships')
 			.select('*')
@@ -34,6 +36,8 @@
 	}
 
 	async function getFriendRequests() {
+	  if (!$user) throw new Error('no user');
+
 		const { data } = await supabaseClient
 			.from('pending_friendships')
 			.select('*')
@@ -48,6 +52,8 @@
 	}
 
 	async function acceptFriendRequest(friendId: string) {
+	  if (!$user) throw new Error('no user');
+
 		loadingAccepts = [...loadingAccepts, friendId];
 		await supabaseClient.from('friendships').insert([
 			{
@@ -72,6 +78,7 @@
 	}
 
 	async function addNewFriend() {
+	  if (!$user) throw new Error('no user');
 		// TODO move to server side and add error handling
 		loadingNewFriend = true;
 		const { data: userData } = await supabaseClient
@@ -99,6 +106,8 @@
 		loadingNewFriend = false;
 	}
 	async function joinRoom(friendId: string, friendUsername: string) {
+	  if (!$user) throw new Error('no user');
+
 		$user.partnerId = friendId;
 		$user.partnerUsername = friendUsername;
 		goto('movies');

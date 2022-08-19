@@ -16,7 +16,7 @@ import { supabaseClient } from '$lib/db';
     <Auth/>
 	{:else}
 	  <Profile/>
-		<a on:click|preventDefault={logout} class="btn">Sign out</a>
+		<btn on:click|preventDefault={logout} class="btn">Sign out</btn>
 	{/if}
 </div>
 

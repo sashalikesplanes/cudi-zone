@@ -1,6 +1,6 @@
 import { browser } from "$app/env";
 import type { Session, User } from "@supabase/gotrue-js";
-import { writable, type Subscriber, type Writable } from "svelte/store";
+import { writable, type Subscriber } from "svelte/store";
 import { supabaseClient } from "./db";
 
 interface CustomUser {
@@ -14,15 +14,15 @@ interface CustomUser {
 export const user = createUserStore();
 
 function createUserStore()  {
-  const { subscribe, set, update } = writable(getUserFromLocalStorage(), (set) => {
-    supabaseClient?.auth.onAuthStateChange((_, session) => {
+  const { subscribe, set } = writable(getUserFromLocalStorage(), (set) => {
+    supabaseClient.auth.onAuthStateChange((_, session) => {
       setUser(set, session);
     });
   });
 
   return {
     subscribe,
-    setUser: (session) => setUser(set, session),
+    setUser: (session: Session) => setUser(set, session),
   }
 
   function setUser(set: Subscriber<CustomUser | null>, session: Session | null) {
