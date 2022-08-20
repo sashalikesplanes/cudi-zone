@@ -27,8 +27,8 @@
 	};
 
 	let pc: RTCPeerConnection;
-	let localStream = new MediaStream();
-	let remoteStream = new MediaStream();
+	let localStream: MediaStream;
+	let remoteStream: MediaStream;
 	let localVideo: HTMLVideoElement;
 	let remoteVideo: HTMLVideoElement;
 	let ws: WebSocket;
@@ -139,14 +139,10 @@
 					break;
 
 				default:
-				  console.log('unrecognized message type: ', messageType);
+					console.log('unrecognized message type: ', messageType);
 					errors += 'unrecognized message type; ';
 					break;
 			}
-			// If partner online, create offer and make ice candidate listener
-			// If partner offline, standby
-			// If recieve offer, add it and send answer
-			// If recieve answer, add it
 		};
 
 		ws.onerror = (event) => {
@@ -159,7 +155,11 @@
 			console.log('WEB SOCKET Closed');
 		};
 
-		return () => ws.close();
+		return () => {
+			ws.close();
+			localStream.getTracks().forEach((track) => track.stop());
+		  remoteStream.getTracks().forEach((track) => track.stop());
+		};
 	});
 </script>
 
@@ -194,4 +194,5 @@
 	{:else if state === 'paused'}
 		<button class="btn ">Play</button>
 	{/if}
+</div>
 </div>
