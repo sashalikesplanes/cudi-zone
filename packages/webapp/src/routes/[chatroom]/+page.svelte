@@ -164,6 +164,8 @@
 	});
 
 	onDestroy(() => {
+	  // Destroy also peer connection
+	  if (pc) pc.close();
 	  if (ws && ws.OPEN) ws.close();
 	  if (localStream) localStream.getTracks().forEach((track) => track.stop());
 	  if (remoteStream) remoteStream.getTracks().forEach((track) => track.stop());
