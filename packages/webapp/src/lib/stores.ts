@@ -14,7 +14,7 @@ interface CustomUser {
 export const user = createUserStore();
 
 function createUserStore()  {
-  const { subscribe, set } = writable(getUserFromLocalStorage(), (set) => {
+  const { subscribe, set, update } = writable(getUserFromLocalStorage(), (set) => {
     supabaseClient.auth.onAuthStateChange((_, session) => {
       setUser(set, session);
     });
@@ -23,6 +23,23 @@ function createUserStore()  {
   return {
     subscribe,
     setUser: (session: Session) => setUser(set, session),
+    changeTheme: () => {
+      update(user => {
+        if (!user) return null;
+        user.theme = user.theme === 'dark' ? 'valentine' : 'dark';
+        setUserToLocalStorage(user);
+        return user;
+      })
+    },
+    setPartner: (partnerId: string, partnerUsername: string) => {
+      update(user => {
+        if (!user) return null;
+        user.partnerId = partnerId;
+        user.partnerUsername = partnerUsername
+        setUserToLocalStorage(user);
+        return user;
+      })
+    }
   }
 
   function setUser(set: Subscriber<CustomUser | null>, session: Session | null) {
@@ -53,6 +70,7 @@ function getUserFromLocalStorage(): CustomUser | null {
 }
 
 function setUserToLocalStorage(user: CustomUser | null) {
+  console.log(user);
   if (!browser) return;
   if (!user) localStorage.removeItem('user');
   else {

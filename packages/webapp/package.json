@@ -19,6 +19,7 @@
 		"@sveltejs/adapter-node": "^1.0.0-next.86",
 		"@sveltejs/kit": "next",
 		"@tailwindcss/forms": "^0.5.2",
+		"@types/server": "^1.0.5",
 		"@typescript-eslint/eslint-plugin": "^5.27.0",
 		"@typescript-eslint/parser": "^5.27.0",
 		"autoprefixer": "^10.4.7",
@@ -40,7 +41,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@supabase/auth-helpers-svelte": "^0.4.5",
-		"@supabase/auth-helpers-sveltekit": "^0.6.10"
+		"@supabase/supabase-js": "^1.35.6",
+		"server": "^1.0.0"
 	}
 }

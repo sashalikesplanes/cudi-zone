@@ -2,13 +2,18 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./lib/index.js",
+  "typings": "./lib/types.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "PORT=3003 node build/index.js",
+    "start": "PORT=3003 node lib/index.js",
     "build": "npx tsc",
-    "dev": "npx tsc --watch & PORT=3003 nodemon -q build/index.js"
+    "dev": "npx tsc --watch & PORT=3003 nodemon -q lib/index.js"
   },
+  "directories": {
+    "lib": "lib"
+  },
+  "files": ["lib"],
   "keywords": [],
   "author": "",
   "license": "ISC",

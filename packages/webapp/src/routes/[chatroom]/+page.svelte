@@ -1,18 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { user } from '$lib/stores';
 	import { goto } from '$app/navigation';
+	import type { ServerMessage, ClientMessage } from '$lib/messages';
+
 
 	// TODO move WS and WebRTC into a separate component that dispatches key events back here
-	type MessageType = 'video-offer' | 'video-answer' | 'new-ice' | 'partner-check' | 'connection';
-	interface Message {
-		from: string;
-		messageType: MessageType;
-		payload: any | undefined;
-	}
-	interface SentMessage extends Message {
-		to: string[];
-	}
 
 	let player: HTMLVideoElement;
 	let state = 'paused';
@@ -31,10 +24,12 @@
 	let remoteStream: MediaStream;
 	let localVideo: HTMLVideoElement;
 	let remoteVideo: HTMLVideoElement;
+
 	let ws: WebSocket;
+	let wsProtocol: string;
 	const wsUrl = import.meta.env.VITE_SERVER_URL;
 
-	function sendMessage(ws: WebSocket, msg: SentMessage) {
+	function sendMessage(ws: WebSocket, msg: ClientMessage) {
 		ws.send(JSON.stringify(msg));
 	}
 
@@ -54,12 +49,22 @@
 	}
 
 	onMount(async () => {
-		if (!$user) goto('/profile');
+		if (!$user) {
+		  goto('/');
+		  return;
+    }
 
 		// Add local stream to peer connection
 		pc = new RTCPeerConnection(stunServers);
 		localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 		localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
+
+		// new tracks must be coming from remote, hence add to remote video
+		remoteStream = new MediaStream();
+		pc.ontrack = (event) => {
+		  console.log(event.track);
+		  remoteStream.addTrack(event.track);
+		}
 
 		// Add local stream to local video
 		localVideo.srcObject = localStream;
@@ -67,7 +72,8 @@
 		// Add remote stream (empty now) to remote video
 		remoteVideo.srcObject = remoteStream;
 
-		ws = new WebSocket(`${import.meta.env.DEV ? 'ws' : 'wss'}://${wsUrl}/message`);
+   wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+		ws = new WebSocket(`${wsProtocol}${wsUrl}/message?id=${$user.id}`);
 		ws.onopen = () => {
 			if (!$user) {
 				errors += 'no user when WS opened; ';
@@ -75,10 +81,10 @@
 			}
 
 			sendMessage(ws, {
-				to: [$user.partnerId],
+				to: ['wss'],
 				from: $user.id,
 				messageType: 'partner-check',
-				payload: undefined
+				payload: $user.partnerId
 			});
 		};
 
@@ -88,7 +94,8 @@
 				return;
 			}
 
-			const { from, messageType, payload } = JSON.parse(event.data) as Message;
+			const { from, messageType, payload } = JSON.parse(event.data) as ServerMessage;
+			console.log('recieved message of type: ', messageType)
 			switch (messageType) {
 				case 'partner-check':
 					if (!payload) break;
@@ -154,13 +161,13 @@
 			errors += 'WebSocket closed; ';
 			console.log('WEB SOCKET Closed');
 		};
-
-		return () => {
-			ws.close();
-			localStream.getTracks().forEach((track) => track.stop());
-		  remoteStream.getTracks().forEach((track) => track.stop());
-		};
 	});
+
+	onDestroy(() => {
+	  if (ws && ws.OPEN) ws.close();
+	  if (localStream) localStream.getTracks().forEach((track) => track.stop());
+	  if (remoteStream) remoteStream.getTracks().forEach((track) => track.stop());
+	})
 </script>
 
 <main class="flex gap-1">
@@ -175,6 +182,7 @@
 		<video bind:this={localVideo} class="border-warning border-2" autoplay playsinline />
 	</div>
 </main>
+
 <p class="text-error text-center">{errors}</p>
 <div class="w-11/12 justify-center flex gap-3 mx-auto ">
 	<p class="font-bold text-center text-xl ">State: {state}</p>
@@ -194,5 +202,4 @@
 	{:else if state === 'paused'}
 		<button class="btn ">Play</button>
 	{/if}
-</div>
 </div>

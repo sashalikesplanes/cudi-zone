@@ -13,3 +13,4 @@ app.get('/health', (_, res) => {
 
 const server = app.listen(port, () => console.log(`WSS listening on port: ${port}`));
 wss(server);
+

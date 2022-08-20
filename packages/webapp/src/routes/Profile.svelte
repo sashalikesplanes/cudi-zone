@@ -107,10 +107,8 @@
 	}
 	async function joinRoom(friendId: string, friendUsername: string) {
 	  if (!$user) throw new Error('no user');
-
-		$user.partnerId = friendId;
-		$user.partnerUsername = friendUsername;
-		goto('movies');
+	  user.setPartner(friendId, friendUsername);
+		goto('chatroom');
 	}
 </script>
 
