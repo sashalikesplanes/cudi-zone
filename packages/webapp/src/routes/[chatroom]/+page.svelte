@@ -27,7 +27,7 @@
 
 	let ws: WebSocket;
 	let wsProtocol: string;
-	const wsUrl = 'cudiserver.kiselev.lu';
+	const wsUrl = import.meta.env.DEV ? 'localhost:3003' : 'cudiserver.kiselev.lu';
 
 	function sendMessage(ws: WebSocket, msg: ClientMessage) {
 		ws.send(JSON.stringify(msg));
@@ -72,7 +72,7 @@
 		// Add remote stream (empty now) to remote video
 		remoteVideo.srcObject = remoteStream;
 
-   wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
 		ws = new WebSocket(`${wsProtocol}${wsUrl}/message?id=${$user.id}`);
 		ws.onopen = () => {
 			if (!$user) {
