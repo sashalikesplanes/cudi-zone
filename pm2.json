@@ -1,0 +1,20 @@
+{
+	"apps": [
+		{
+			"name": "cudizone-website",
+			"cwd": "./packages/webapp",
+			"kill_timeout": 3000,
+			"restart_delay": 3000,
+			"script": "yarn",
+			"args": "start"
+		},
+		{
+			"name": "cudizone-server",
+			"cwd": "./packages/server",
+			"kill_timeout": 3000,
+			"restart_delay": 3000,
+			"script": "yarn",
+			"args": "start"
+		}
+	]
+}

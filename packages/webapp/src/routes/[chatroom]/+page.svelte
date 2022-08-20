@@ -27,7 +27,7 @@
 
 	let ws: WebSocket;
 	let wsProtocol: string;
-	const wsUrl = import.meta.env.VITE_SERVER_URL;
+	const wsUrl = 'cudiserver.kiselev.lu';
 
 	function sendMessage(ws: WebSocket, msg: ClientMessage) {
 		ws.send(JSON.stringify(msg));
@@ -164,6 +164,7 @@
 	});
 
 	onDestroy(() => {
+          if (pc) pc.close();
 	  if (ws && ws.OPEN) ws.close();
 	  if (localStream) localStream.getTracks().forEach((track) => track.stop());
 	  if (remoteStream) remoteStream.getTracks().forEach((track) => track.stop());
