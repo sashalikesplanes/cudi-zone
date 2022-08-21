@@ -22,6 +22,7 @@ export function unsubcribeFromMessages(callback: (message: ServerMessage) => voi
 
 export function sendMessage(msg: ClientMessage) {
   console.log('sending', msg);
+  // TODO if it is not ready then we add to queue
   if (ws.readyState === 0) ws.onopen = () => ws.send(JSON.stringify(msg));
   else if (ws.readyState === 1) ws.send(JSON.stringify(msg));
   else throw new Error('sending to closed websocket');

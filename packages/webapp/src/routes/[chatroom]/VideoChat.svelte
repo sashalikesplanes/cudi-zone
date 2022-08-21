@@ -34,6 +34,7 @@
 		remoteStream = new MediaStream();
 		pc.ontrack = (event) => {
 		  console.log('recieved track: ', event.track);
+      remoteStream.addTrack(event.track);
 		  event.track.onunmute = () => {
 		    console.log('unmuted track: ', event.track);
         remoteStream.addTrack(event.track);
