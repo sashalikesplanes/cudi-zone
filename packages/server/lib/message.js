@@ -26,8 +26,9 @@ exports.default = (server) => {
                 throw new Error('bad query parameter for id');
             ws.id = queryId;
             ws.emit('connection', ws, req);
+            console.log('clients: ', [...clients].map(client => client.id).join(', '));
             sendMessage(clients, [ws.id], {
-                from: 'wss',
+                from: ['wss'],
                 messageType: 'connection',
                 payload: undefined,
             });
@@ -39,8 +40,8 @@ exports.default = (server) => {
                         // broadcast if desired partner is here
                         console.log('partner check payload: ', payload);
                         const isPartnerOnline = [...clients].some(client => client.id === payload);
-                        sendMessage(clients, [from], {
-                            from: 'wss',
+                        sendMessage(clients, from, {
+                            from: ['wss'],
                             messageType: 'partner-check',
                             payload: isPartnerOnline,
                         });

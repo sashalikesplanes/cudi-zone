@@ -4,10 +4,19 @@ import { Duplex } from 'stream';
 import WebSocket, { WebSocketServer } from 'ws';
 import url from 'url';
 
-type MessageType = 'video-offer' | 'video-answer' | 'new-ice' | 'partner-check' | 'connection';
+type MessageType = 'video-offer' |
+                   'video-answer' |
+                   'new-ice' |
+                   'partner-check' |
+                   'connection' |
+                   'add-torrent' |
+                   'torrent-ready' |
+                   'playback-ready' |
+                   'play' |
+                   'pause';
 
 interface ServerMessage {
-  from: string;
+  from: string[];
   messageType: MessageType;
   payload: any | undefined;
 }
@@ -45,8 +54,9 @@ export default (server: Server) => {
       ws.id = queryId;
 
       ws.emit('connection', ws, req);
+      console.log('clients: ', [...clients].map(client => client.id).join(', '))
       sendMessage(clients, [ws.id], {
-        from: 'wss',
+        from: ['wss'],
         messageType: 'connection',
         payload: undefined,
       })
@@ -59,8 +69,8 @@ export default (server: Server) => {
             // broadcast if desired partner is here
             console.log('partner check payload: ', payload);
             const isPartnerOnline = [...clients].some(client => client.id === payload);
-            sendMessage(clients, [from], {
-              from: 'wss',
+            sendMessage(clients, from, {
+              from: ['wss'],
               messageType: 'partner-check',
               payload: isPartnerOnline,
             })

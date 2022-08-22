@@ -22,8 +22,7 @@
 	    return;
 	  }
 
-    await onMessage($user.id, handleMessage);
-
+    onMessage($user.id, $user.partnerId, handleMessage);
 
 		// Add local stream to peer connection
 		pc = new RTCPeerConnection(stunServers);
@@ -48,15 +47,7 @@
 		// Add remote stream (empty now) to remote video
 		remoteVideo.srcObject = remoteStream;
 
-    sendMessage({
-      to: ['wss'],
-      from: $user.id,
-      messageType: 'partner-check',
-      payload: $user.partnerId
-    });
-
 	})
-
 
 	async function handleMessage({ from, messageType, payload }: ServerMessage) {
 	  console.log(messageType);
@@ -69,7 +60,7 @@
       if (!event.candidate) return;
       sendMessage({
         to: [$user.partnerId],
-        from: $user.id,
+        from: [$user.id],
         messageType: 'new-ice',
         payload: event.candidate
       });
@@ -88,7 +79,7 @@
         await pc.setLocalDescription(offer);
 
         sendMessage({
-          from: $user.id,
+          from: [$user.id],
           to: [$user.partnerId],
           messageType: 'video-offer',
           payload: pc.localDescription
@@ -105,7 +96,7 @@
         await pc.setLocalDescription(answer);
 
         sendMessage({
-          from: $user.id,
+          from: [$user.id],
           to: [$user.partnerId],
           messageType: 'video-answer',
           payload: pc.localDescription
@@ -136,8 +127,8 @@
 
 </script>
 
-<p class="text-error">{errors}</p>
-<div class="relative h-11/12 w-48">
+<aside class="flex flex-col gap-4 w-48">
+  <p class="text-error">{errors}</p>
   <video bind:this={remoteVideo} class="border-error border-2" autoplay playsinline />
   <video bind:this={localVideo} class="border-warning border-2" autoplay playsinline />
-</div>
+</aside>

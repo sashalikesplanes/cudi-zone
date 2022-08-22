@@ -1,7 +1,17 @@
-type MessageType = 'video-offer' | 'video-answer' | 'new-ice' | 'partner-check' | 'connection';
+type MessageType = 'video-offer' |
+                   'video-answer' |
+                   'new-ice' |
+                   'partner-check' |
+                   'connection' |
+                   'add-torrent' |
+                   'torrent-ready' |
+                   'playback-ready' |
+                   'play' |
+                   'seek-to' |
+                   'pause';
 
 export interface ServerMessage {
-  from: string;
+  from: string[];
   messageType: MessageType;
   payload: any | undefined;
 }

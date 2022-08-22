@@ -7,11 +7,12 @@ const wsUrl = import.meta.env.DEV ? 'localhost:3003' : 'cudiserver.kiselev.lu';
 export type handleMessageCallback = (message: ServerMessage) => void;
 
 const onMessageCallbacks: handleMessageCallback[] = [];
+const messageQueue: ClientMessage[] = [];
 
-export async function onMessage(id: string, callback: (message: ServerMessage) => void) {
+export async function onMessage(id: string, partnerId: string, callback: (message: ServerMessage) => void) {
   onMessageCallbacks.push(callback);
   if (onMessageCallbacks.length === 1) {
-    setupWebsocket(id);
+    setupWebsocket(id, partnerId);
   }
 }
 
@@ -22,13 +23,15 @@ export function unsubcribeFromMessages(callback: (message: ServerMessage) => voi
 
 export function sendMessage(msg: ClientMessage) {
   console.log('sending', msg);
-  // TODO if it is not ready then we add to queue
-  if (ws.readyState === 0) ws.onopen = () => ws.send(JSON.stringify(msg));
-  else if (ws.readyState === 1) ws.send(JSON.stringify(msg));
-  else throw new Error('sending to closed websocket');
+  if (ws.readyState === 0) {
+    messageQueue.push(msg);
+    ws.onopen = () => messageQueue.forEach(msg => ws.send(JSON.stringify(msg)));
+  } else if (ws.readyState === 1) {
+    ws.send(JSON.stringify(msg));
+  } else throw new Error('sending to closed websocket');
 }
 
-function setupWebsocket(id: string) {
+function setupWebsocket(id: string, partnerId: string) {
   const wsProtocol = 'ws://';
   ws = new WebSocket(`${wsProtocol}${wsUrl}/message?id=${id}`);
 
@@ -43,6 +46,13 @@ function setupWebsocket(id: string) {
   ws.onclose = () => {
     console.log('WEB SOCKET Closed');
   };
+
+  sendMessage({
+    to: ['wss'],
+    from: [id],
+    messageType: 'partner-check',
+    payload: partnerId
+  });
 };
 
 function destroyWebsocket() {
