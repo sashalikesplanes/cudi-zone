@@ -8,6 +8,7 @@ type MessageType = 'video-offer' |
                    'playback-ready' |
                    'play' |
                    'seek-to' |
+                   'disconnect' |
                    'pause';
 
 export interface ServerMessage {

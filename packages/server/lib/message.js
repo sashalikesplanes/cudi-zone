@@ -25,6 +25,16 @@ exports.default = (server) => {
             if (typeof queryId !== 'string')
                 throw new Error('bad query parameter for id');
             ws.id = queryId;
+            function sendDisconnect(disconnectId) {
+                console.log('sending disconnect msg');
+                sendMessage(clients, [...clients].map(client => client.id), {
+                    from: ['wss'],
+                    messageType: 'disconnect',
+                    payload: disconnectId,
+                });
+            }
+            ws.onclose = (_) => sendDisconnect(ws.id);
+            ws.onerror = (_) => sendDisconnect(ws.id);
             ws.emit('connection', ws, req);
             console.log('clients: ', [...clients].map(client => client.id).join(', '));
             sendMessage(clients, [ws.id], {

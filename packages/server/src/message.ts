@@ -13,6 +13,8 @@ type MessageType = 'video-offer' |
                    'torrent-ready' |
                    'playback-ready' |
                    'play' |
+                   'seek-to' |
+                   'disconnect' |
                    'pause';
 
 interface ServerMessage {
@@ -52,6 +54,18 @@ export default (server: Server) => {
       const queryId = url.parse(req.url, true).query.id;
       if (typeof queryId !== 'string') throw new Error('bad query parameter for id');
       ws.id = queryId;
+
+      function sendDisconnect(disconnectId: string) {
+        console.log('sending disconnect msg');
+        sendMessage(clients, [...clients].map(client => client.id), {
+          from: ['wss'],
+          messageType: 'disconnect',
+          payload: disconnectId,
+        })
+      }
+
+      ws.onclose = (_) => sendDisconnect(ws.id);
+      ws.onerror = (_) => sendDisconnect(ws.id);
 
       ws.emit('connection', ws, req);
       console.log('clients: ', [...clients].map(client => client.id).join(', '))
