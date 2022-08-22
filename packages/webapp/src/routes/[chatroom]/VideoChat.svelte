@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
-  import type { ServerMessage } from '$lib/messages';
+  import type { ServerMessage, MessageType } from '$lib/messages';
   import { user } from '$lib/stores';
   import { onMessage, sendMessage, unsubcribeFromMessages } from '$lib/ws-messenger';
 
@@ -15,6 +15,8 @@
 	let remoteStream: MediaStream;
 	let localVideo: HTMLVideoElement;
 	let remoteVideo: HTMLVideoElement;
+
+	const messagesRecieved: MessageType[] = [];
 
 	onMount(async () => {
 	  if (!$user) {
@@ -73,6 +75,8 @@
 
     switch (messageType) {
       case 'partner-check':
+        if (messagesRecieved.includes(messageType)) break;
+        else (messagesRecieved.push(messageType));
         if (!payload) break;
 
         const offer = await pc.createOffer();
@@ -89,6 +93,13 @@
         break;
 
       case 'video-offer':
+        if (messagesRecieved.includes(messageType)) break;
+        else (messagesRecieved.push(messageType));
+
+        if (!localStream || localStream.getTracks().length === 0) {
+          localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+          localStream.getTracks().forEach(track => pc.addTrack(track));
+        }
         // add offer, make answer, send answer, create ice listener
         const offerDesc = new RTCSessionDescription(payload);
         await pc.setRemoteDescription(offerDesc);
@@ -106,6 +117,14 @@
         break;
 
       case 'video-answer':
+        if (messagesRecieved.includes(messageType)) break;
+        else (messagesRecieved.push(messageType));
+
+        if (!localStream || localStream.getTracks().length === 0) {
+          localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+          localStream.getTracks().forEach(track => pc.addTrack(track));
+        }
+
         const answerDesc = new RTCSessionDescription(payload);
         await pc.setRemoteDescription(answerDesc);
         break;
