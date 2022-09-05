@@ -54,7 +54,7 @@ function createUserStore()  {
       id: session.user.id,
       partnerId: '',
       partnerUsername: '',
-      theme: 'dark' as 'dark' | 'valentine',
+      theme: 'valentine' as 'dark' | 'valentine',
       name: session.user.email?.split('@')[0] || 'No name',
     }
     set(user);

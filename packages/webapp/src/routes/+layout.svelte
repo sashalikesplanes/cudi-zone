@@ -7,7 +7,7 @@
 	let html: HTMLElement;
 	if (browser) {
 		html = document.childNodes[1] as HTMLElement;
-		if ($user) html.dataset.theme = $user.theme;
+		if ($user) html.dataset.theme = $user.theme || 'valentine';
 	}
 </script>
 

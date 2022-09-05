@@ -148,6 +148,6 @@
 
 <aside class="flex flex-col gap-4 w-48">
   <p class="text-error">{errors}</p>
-  <video bind:this={remoteVideo} class="border-error border-2" autoplay playsinline />
-  <video bind:this={localVideo} class="border-warning border-2" autoplay playsinline />
+  <video bind:this={remoteVideo} class="border-2" autoplay playsinline />
+  <video bind:this={localVideo} class="border-2" autoplay playsinline />
 </aside>
