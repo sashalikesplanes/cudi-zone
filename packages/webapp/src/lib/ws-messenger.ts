@@ -1,8 +1,8 @@
 import type { ServerMessage, ClientMessage } from '$lib/messages';
 
 let ws: WebSocket;
-let wsProtocol: string;
 const wsUrl = import.meta.env.DEV ? 'localhost:3003' : 'cudiserver.kiselev.lu';
+const wsProtocol = import.meta.env.DEV ? 'ws://' : 'wss://';
 
 export type handleMessageCallback = (message: ServerMessage) => void;
 
@@ -32,7 +32,6 @@ export function sendMessage(msg: ClientMessage) {
 }
 
 function setupWebsocket(id: string, partnerId: string) {
-  const wsProtocol = 'ws://';
   ws = new WebSocket(`${wsProtocol}${wsUrl}/message?id=${id}`);
 
   ws.onmessage = async (event) => {
