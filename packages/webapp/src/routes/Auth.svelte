@@ -59,11 +59,18 @@
 		>Sign {view === 'signin' ? 'In' : 'Up'}</button
 	>
 </form>
-<div class="flex justify-center">
+<div class="flex flex-col items-center">
 	{#if view === 'signin'}
 		<a class="link text-center w-max mb-3" href="/?view=signup"
 			>Don't have an account? Sign up!</a
 		>
+		<p class="font-bold">Demo account 1:</p>
+		<p>Username: sasha</p>
+		<p>Password: 123456</p>
+		<p class="font-bold">Demo account 2:</p>
+		<p>Username: sasha2</p>
+		<p>Password: 123456</p>
+		<p>Please restart the application if the video chat does not connect.</p>
 	{:else}
 		<a class="link text-center w-max" href="/?view=signin"
 			>Already have an account? Sign in!</a
